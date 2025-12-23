@@ -38,7 +38,7 @@ def run_kpi_job():
             (row[0], row[1], row[2], row[3])
         )
 
-    print("Datas are saved.")
+    print("KPI job finished.")
 
     conn.commit()
 

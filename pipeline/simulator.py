@@ -13,16 +13,24 @@ conn = psycopg2.connect(
 
 cur = conn.cursor()
 
-while True:
-    speed = random.randint(0, 220)
-    distance = random.randint(0, 1100)
+try:
+    while True:
+        speed = random.randint(0, 220)
+        distance = random.randint(0, 1100)
 
-    cur.execute(
-        "INSERT INTO raw_events (speed, distance) VALUES (%s, %s)",
-        (speed, distance)
-    )
+        cur.execute(
+            "INSERT INTO raw_events (speed, distance) VALUES (%s, %s)",
+            (speed, distance)
+        )
 
-    conn.commit()
+        conn.commit()
 
-    print(f"speed {speed} distance {distance}")
-    time.sleep(5)
+        print(f"speed {speed} distance {distance}")
+        time.sleep(5)
+
+except KeyboardInterrupt:
+    print("Simulator stopped by user.")
+
+finally:
+    cur.close()
+    conn.close()

@@ -36,7 +36,7 @@ def run_cleaner():
 
     conn.commit()
 
-    print(f"{len(rows)} datas are saved. ")
+    print(f"Cleaner finished: {len(rows)} records processed.")
 
     cur.close()
     conn.close()

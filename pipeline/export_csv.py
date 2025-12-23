@@ -38,7 +38,7 @@ def export_csv():
         ])
         writer.writerows(rows)
 
-    print("daily_kpis.csv created.")
+    print("CSV export completed: output/daily_kpis.csv")
 
     cur.close()
     conn.close()
