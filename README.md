@@ -52,7 +52,7 @@ psql -U <user> -d <database> -f db/schema.sql
 5. Run the pipeline:
 
 ```bash
-python run_pipeline.py
+python pipeline/run_pipeline.py
 ```
 
 ---
