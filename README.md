@@ -43,17 +43,17 @@ No credentials are hard-coded.
 1. Start PostgreSQL (via Docker)
 2. Before running the pipeline, initialize the database schema:
 
-```bash
-psql -U <user> -d <database> -f db/schema.sql
-```
+   ```bash
+   psql -U <user> -d <database> -f db/schema.sql
+   ```
 
 3. Create a `.env` file
 4. Run the simulator in a separate terminal
 5. Run the pipeline:
 
-```bash
-python pipeline/run_pipeline.py
-```
+   ```bash
+   python pipeline/run_pipeline.py
+   ```
 
 ---
 
