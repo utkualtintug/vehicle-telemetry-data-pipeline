@@ -19,6 +19,7 @@ flowchart TD
 - Raw data is preserved for traceability
 - Clean data is validated before aggregation
 - Daily KPIs are recomputed on each pipeline run and upserted (one row per day)
+- The simulator intentionally generates out-of-range values to demonstrate data quality enforcement during cleaning.
 
 ---
 
