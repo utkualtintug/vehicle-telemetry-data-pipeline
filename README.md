@@ -72,7 +72,3 @@ python run_pipeline.py
 - PostgreSQL
 - Docker
 - psycopg2
-
-```
-
-```
