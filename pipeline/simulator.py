@@ -2,6 +2,7 @@ import random
 import psycopg2
 from datetime import datetime, timedelta
 from config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
+from logger import logger
 
 TOTAL_EVENTS = 20000
 
@@ -10,6 +11,7 @@ SCENARIOS = [
     ("highway", 0.25),
     ("fault", 0.10),
 ]
+
 
 def choose_scenario():
     r = random.random()
@@ -20,9 +22,12 @@ def choose_scenario():
             return name
     return "urban"
 
+
 def generate_event(scenario, last_speed):
-    event_time = datetime.now() - timedelta(days=random.randint(0, 30),
-    seconds=random.randint(0, 86400))
+    event_time = datetime.now() - timedelta(
+        days=random.randint(0, 30),
+        seconds=random.randint(0, 86400)
+    )
 
     if scenario == "urban":
         speed = max(0, min(60, last_speed + random.randint(-10, 10)))
@@ -37,7 +42,9 @@ def generate_event(scenario, last_speed):
         distance = round(random.uniform(5.0, 50.0), 2)
 
     else:
-        fault_type = random.choice(["speed_null", "speed_high", "distance_neg", "time_null"])
+        fault_type = random.choice(
+            ["speed_null", "speed_high", "distance_neg", "time_null"]
+        )
         speed = random.randint(0, 120)
         distance = round(random.uniform(1.0, 10.0), 2)
 
@@ -52,36 +59,53 @@ def generate_event(scenario, last_speed):
 
     return speed, distance, event_time
 
+
 def run_simulator():
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT
-    )
-    cur = conn.cursor()
+    logger.info("Simulator started")
 
-    last_speed = random.randint(20, 60)
+    conn = None
+    cur = None
 
-    for _ in range(TOTAL_EVENTS):
-        scenario = choose_scenario()
-        speed, distance, event_time = generate_event(scenario, last_speed)
-
-        if speed is not None:
-            last_speed = speed
-
-        cur.execute(
-            """
-            INSERT INTO raw_events (speed, distance, event_time)
-            VALUES (%s, %s, %s)
-            """,
-            (speed, distance, event_time)
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            port=DB_PORT
         )
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        cur = conn.cursor()
+        last_speed = random.randint(20, 60)
+
+        for _ in range(TOTAL_EVENTS):
+            scenario = choose_scenario()
+            speed, distance, event_time = generate_event(scenario, last_speed)
+
+            if speed is not None:
+                last_speed = speed
+
+            cur.execute(
+                """
+                INSERT INTO raw_events (speed, distance, event_time)
+                VALUES (%s, %s, %s)
+                """,
+                (speed, distance, event_time)
+            )
+
+        conn.commit()
+        logger.info(f"Simulator finished. Total events inserted: {TOTAL_EVENTS}")
+
+    except Exception as e:
+        logger.error(f"Simulator failed: {e}")
+        raise
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
 
 if __name__ == "__main__":
     run_simulator()
