@@ -13,45 +13,62 @@ def run_cleaner():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id
+        SELECT id, speed, distance, event_time
         FROM raw_events
         WHERE id NOT IN (SELECT id FROM clean_events)
+            AND id NOT IN (SELECT raw_id FROM rejected_events);
     """)
-    raw_records = cur.fetchall()
-    total_raw = len(raw_records)
 
-    cur.execute("""
-        SELECT id, speed, distance, eventtime
-        FROM raw_events
-        WHERE id NOT IN (SELECT id FROM clean_events)
-            AND speed >= 0
-            AND speed <= 120
-            AND distance >= 0
-            AND distance <= 600
-            AND eventtime IS NOT NULL;
-    """)
     rows = cur.fetchall()
-    accepted = len(rows)
+    candidate_count = len(rows)
+
+    rejected_count = 0
+    accepted_count = 0
 
     for row in rows:
+        raw_id, speed, distance, event_time = row
+
+        reject_reason = None
+
+        if event_time is None:
+            reject_reason = "MISSING_EVENTTIME"
+        elif speed is None or speed < 0 or speed > 120:
+            reject_reason = "SPEED_INVALID"
+        elif distance is None or distance < 0 or distance > 600:
+            reject_reason = "DISTANCE_INVALID"
+
+        if reject_reason is not None:
+            rejected_count += 1
+            cur.execute(
+                """
+                INSERT INTO rejected_events (raw_id, reject_reason)
+                VALUES (%s, %s)
+                ON CONFLICT (raw_id) DO NOTHING;
+                """,
+                (raw_id, reject_reason)
+            )
+            continue
+
+        accepted_count += 1
         cur.execute(
             """
-            INSERT INTO clean_events (id, speed, distance, eventtime)
+            INSERT INTO clean_events (id, speed, distance, event_time)
             VALUES (%s, %s, %s, %s)
+            ON CONFLICT (id) DO NOTHING;
             """,
-            (row[0], row[1], row[2], row[3])
+            (raw_id, speed, distance, event_time)
         )
 
     conn.commit()
 
-    rejected = total_raw - accepted
-    reject_rate = (rejected / total_raw) if total_raw > 0 else 0
+    evaluated = accepted_count + rejected_count
+    reject_rate = (rejected_count / evaluated) if evaluated > 0 else 0
 
     print(
         f"Cleaner finished.\n"
-        f"Total raw records: {total_raw}\n"
-        f"Accepted records: {accepted}\n"
-        f"Rejected records: {rejected}\n"
+        f"Candidate records: {candidate_count}\n"
+        f"Accepted records: {accepted_count}\n"
+        f"Rejected records: {rejected_count}\n"
         f"Reject rate: {reject_rate:.2f}"
     )
 
