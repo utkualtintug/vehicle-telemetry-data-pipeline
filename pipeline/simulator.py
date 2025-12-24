@@ -3,7 +3,7 @@ import psycopg2
 from datetime import datetime, timedelta
 from config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
 
-TOTAL_EVENTS = 40000
+TOTAL_EVENTS = 20000
 
 SCENARIOS = [
     ("urban", 0.65),
