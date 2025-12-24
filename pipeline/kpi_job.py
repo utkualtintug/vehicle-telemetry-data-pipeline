@@ -14,12 +14,12 @@ def run_kpi_job():
 
     cur.execute("""
         SELECT
-            DATE(eventtime) AS kpi_date,
+            DATE(event_time) AS kpi_date,
             COUNT(id) AS total_events,
             ROUND(AVG(speed), 2) AS avg_speed,
             SUM(distance) AS total_distance
         FROM clean_events
-        GROUP BY DATE(eventtime);
+        GROUP BY DATE(event_time);
     """)
 
     rows = cur.fetchall()
