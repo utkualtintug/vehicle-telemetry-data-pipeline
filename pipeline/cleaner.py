@@ -1,6 +1,7 @@
 import psycopg2
 from config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
 from logger import logger
+from validation import validate_event
 
 def run_cleaner():
     logger.info("Cleaner started")
@@ -36,16 +37,13 @@ def run_cleaner():
         for row in rows:
             raw_id, speed, distance, event_time = row
 
-            reject_reason = None
+            is_valid, reject_reason = validate_event(
+                speed=speed,
+                distance=distance,
+                event_time=event_time
+            )
 
-            if event_time is None:
-                reject_reason = "MISSING_EVENTTIME"
-            elif speed is None or speed < 0 or speed > 120:
-                reject_reason = "SPEED_INVALID"
-            elif distance is None or distance < 0 or distance > 600:
-                reject_reason = "DISTANCE_INVALID"
-
-            if reject_reason is not None:
+            if not is_valid:
                 rejected_count += 1
                 cur.execute(
                     """
