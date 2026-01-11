@@ -1,6 +1,12 @@
 .env
 __pycache__/
+.pytest_cache/
 .DS_Store
-output/daily_kpis.csv
-.venv
-.pytest_cache
+.venv/
+
+# Keep data/raw folder, but ignore downloaded datasets
+data/raw/*.csv
+!data/raw/.gitkeep
+
+# Ignore outputs
+output/
