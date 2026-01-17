@@ -88,7 +88,7 @@ POSTGRES_PASSWORD=1234.
 
 ## How to Run
 
-### 1) Start PostgreSQL (Docker)
+### 1. Start PostgreSQL (Docker)
 
 ```bash
 docker compose up -d
@@ -103,19 +103,42 @@ docker compose down -v
 docker compose up -d
 ```
 
-### 2) Install Python dependencies
+### 2. Create a Virtual Environment
+
+#### macOS / Linux
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
+
+#### Windows (PowerShell)
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+### 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 3) Run the pipeline
+### 4. Run the Pipeline
+
+#### macOS / Linux
 
 ```bash
 python3 pipeline/run_pipeline.py
 ```
+
+#### Windows
+
+```powershell
+python pipeline\run_pipeline.py
+```
+
 
 Output:
 
